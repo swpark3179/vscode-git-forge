@@ -1,0 +1,102 @@
+{
+  "name": "git-forge",
+  "displayName": "Git Forge",
+  "description": "고급 Git 작업을 안전하고, 시각적이며, 되돌릴 수 있게 제공하는 VSCode 확장",
+  "version": "0.1.0",
+  "publisher": "git-forge",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "rebase",
+    "reflog",
+    "history",
+    "branch"
+  ],
+  "main": "./dist/extension.js",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swpark3179/vscode-git-forge.git"
+  },
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "gitForge",
+          "title": "Git Forge",
+          "icon": "media/activitybar.svg"
+        }
+      ]
+    },
+    "views": {
+      "gitForge": [
+        {
+          "id": "gitForge.navigation",
+          "name": "Git Forge",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "gitForge.open",
+        "title": "Git Forge: 패널 열기"
+      },
+      {
+        "command": "gitForge.branchRepose",
+        "title": "Git Forge: 브랜치 리포지"
+      },
+      {
+        "command": "gitForge.commitReorganize",
+        "title": "Git Forge: 커밋 재정비"
+      },
+      {
+        "command": "gitForge.branchUpdate",
+        "title": "Git Forge: 브랜치 최신화"
+      },
+      {
+        "command": "gitForge.branchCleanup",
+        "title": "Git Forge: 브랜치 정리"
+      },
+      {
+        "command": "gitForge.reflogRecover",
+        "title": "Git Forge: Reflog 복구"
+      },
+      {
+        "command": "gitForge.commitGraph",
+        "title": "Git Forge: 커밋 그래프"
+      },
+      {
+        "command": "gitForge.historySearch",
+        "title": "Git Forge: 이력 검색"
+      },
+      {
+        "command": "gitForge.fileHistory",
+        "title": "Git Forge: 파일 이력"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild src/extension.ts --bundle --platform=node --target=node18 --format=cjs --external:vscode --outfile=dist/extension.js && esbuild webview/main.ts --bundle --target=es2020 --format=iife --outfile=dist/webview.js",
+    "watch": "esbuild src/extension.ts --bundle --platform=node --target=node18 --format=cjs --external:vscode --outfile=dist/extension.js --watch & esbuild webview/main.ts --bundle --target=es2020 --format=iife --outfile=dist/webview.js --watch",
+    "typecheck": "tsc --noEmit",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.4.0"
+  }
+}
