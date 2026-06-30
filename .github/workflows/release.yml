@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: "버전 증가 유형 (semver)"
+        required: true
+        type: choice
+        default: patch
+        options:
+          - major
+          - minor
+          - patch
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Determine previous tag
+        id: prev
+        run: |
+          prev_tag="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          echo "tag=${prev_tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Bump version
+        id: bump
+        run: |
+          new_version="$(npm version "${{ inputs.release_type }}" --no-git-tag-version)"
+          echo "version=${new_version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${new_version}" >> "$GITHUB_OUTPUT"
+          echo "Bumped to ${new_version}"
+
+      - name: Build
+        run: npm run build
+
+      - name: Package VSIX
+        run: npm run package
+
+      - name: Locate VSIX
+        id: vsix
+        run: |
+          vsix_path="$(ls -1 *.vsix | head -n 1)"
+          if [ -z "$vsix_path" ]; then
+            echo "::error::VSIX 파일을 찾을 수 없습니다."
+            exit 1
+          fi
+          echo "path=${vsix_path}" >> "$GITHUB_OUTPUT"
+          echo "Found VSIX: ${vsix_path}"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          prev_tag="${{ steps.prev.outputs.tag }}"
+          {
+            echo "body<<__CHANGELOG_EOF__"
+            echo "## 변경 내역"
+            echo ""
+            if [ -n "$prev_tag" ]; then
+              echo "\`${prev_tag}\` 이후의 변경 사항입니다."
+              echo ""
+              git log "${prev_tag}..HEAD" --no-merges --pretty=format:"- %s (%h)"
+            else
+              echo "최초 릴리스입니다."
+              echo ""
+              git log --no-merges --pretty=format:"- %s (%h)"
+            fi
+            echo ""
+            echo "__CHANGELOG_EOF__"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit version bump and tag
+        run: |
+          git commit -am "chore(release): ${{ steps.bump.outputs.version }}"
+          git tag "${{ steps.bump.outputs.tag }}"
+          git push origin HEAD
+          git push origin "${{ steps.bump.outputs.tag }}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.bump.outputs.tag }}" \
+            "${{ steps.vsix.outputs.path }}" \
+            --title "${{ steps.bump.outputs.version }}" \
+            --notes "${{ steps.changelog.outputs.body }}"
