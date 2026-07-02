@@ -2,7 +2,7 @@
   "name": "git-forge",
   "displayName": "Git Forge",
   "description": "고급 Git 작업 — 안전하고, 시각적이며, 되돌릴 수 있게.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "git-forge",
   "license": "MIT",
   "engines": {
@@ -65,8 +65,13 @@
       "properties": {
         "gitForge.protectedBranches": {
           "type": "array",
-          "items": { "type": "string" },
-          "default": ["develop", "release/*"],
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "develop",
+            "release/*"
+          ],
           "description": "정리(cleanup)에서 보호할 브랜치 이름/글롭 목록."
         },
         "gitForge.staleDays": {
