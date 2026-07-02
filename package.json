@@ -1,0 +1,98 @@
+{
+  "name": "git-forge",
+  "displayName": "Git Forge",
+  "description": "고급 Git 작업 — 안전하고, 시각적이며, 되돌릴 수 있게.",
+  "version": "0.1.0",
+  "publisher": "git-forge",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "gitForge",
+          "title": "Git Forge",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "gitForge": [
+        {
+          "type": "webview",
+          "id": "gitForge.sidebar",
+          "name": "Git Forge"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "gitForge.openWelcome",
+        "title": "Git Forge: 시작 화면 열기",
+        "category": "Git Forge"
+      },
+      {
+        "command": "gitForge.open",
+        "title": "Git Forge: 기능 열기",
+        "category": "Git Forge"
+      },
+      {
+        "command": "gitForge.refresh",
+        "title": "Git Forge: 새로고침",
+        "category": "Git Forge",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "gitForge.refresh",
+          "when": "view == gitForge.sidebar",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Git Forge",
+      "properties": {
+        "gitForge.protectedBranches": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["develop", "release/*"],
+          "description": "정리(cleanup)에서 보호할 브랜치 이름/글롭 목록."
+        },
+        "gitForge.staleDays": {
+          "type": "number",
+          "default": 60,
+          "description": "이 일수보다 오래된 브랜치를 '오래된'으로 분류."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src webview --ext ts",
+    "package": "vsce package",
+    "vscode:prepublish": "node esbuild.js --production"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.4.0"
+  }
+}
